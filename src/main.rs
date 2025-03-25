@@ -145,14 +145,12 @@ fn update_snake(
                 .despawn_recursive();
 
             game.parts.pop_back().unwrap();
-        } else {
-            if let Some(_) = game.prize.entity {
-                commands
-                    .entity(game.prize.entity.unwrap())
-                    .despawn_recursive();
+        } else if game.prize.entity.is_some() {
+            commands
+                .entity(game.prize.entity.unwrap())
+                .despawn_recursive();
 
-                game.prize.entity = None;
-            }
+            game.prize.entity = None;
         }
     }
 }
@@ -164,7 +162,7 @@ fn spawn_prize(
     mut materials: ResMut<Assets<ColorMaterial>>,
     timer: Res<MoveTimer>,
 ) {
-    if let Some(_) = game.prize.entity {
+    if game.prize.entity.is_some() {
         return;
     }
     if timer.0.finished() {
