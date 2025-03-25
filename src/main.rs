@@ -137,7 +137,7 @@ fn update_snake(
             ),
         });
 
-        let prize_transform = *transforms.get_mut(game.prize.entity.unwrap()).unwrap();
+        let prize_transform = transforms.get_mut(game.prize.entity.unwrap()).unwrap();
 
         if prize_transform.translation != new_head_transform.translation {
             commands
