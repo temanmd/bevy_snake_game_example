@@ -38,7 +38,7 @@ const PRIZE_COLOR: Color = Color::srgb(1.0, 0.2, 0.4);
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(MoveTimer(Timer::from_seconds(0.2, TimerMode::Repeating)));
+        app.insert_resource(MoveTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
         app.insert_resource(ClearColor(Color::srgb(0.1, 0.1, 0.1)));
         app.add_systems(Startup, setup);
         app.add_systems(Update, (movement_system, update_snake, spawn_prize));
@@ -61,7 +61,7 @@ fn setup(
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
                     MeshMaterial2d(materials.add(SNAKE_COLOR)),
-                    Transform::default().with_scale(Vec3::splat(20.)),
+                    Transform::from_xyz(0.0, 0.0, 1.).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
         ),
@@ -94,17 +94,19 @@ fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<G
         return;
     }
 
-    if keyboard_input.pressed(KeyCode::KeyA) && game.direction != Direction::Right {
+    if keyboard_input.just_pressed(KeyCode::KeyA) && game.direction != Direction::Right {
         game.direction = Direction::Left;
-    } else if keyboard_input.pressed(KeyCode::KeyD) && game.direction != Direction::Left {
+        game.direction_changed = true;
+    } else if keyboard_input.just_pressed(KeyCode::KeyD) && game.direction != Direction::Left {
         game.direction = Direction::Right;
-    } else if keyboard_input.pressed(KeyCode::KeyW) && game.direction != Direction::Down {
+        game.direction_changed = true;
+    } else if keyboard_input.just_pressed(KeyCode::KeyW) && game.direction != Direction::Down {
         game.direction = Direction::Up;
-    } else if keyboard_input.pressed(KeyCode::KeyS) && game.direction != Direction::Up {
+        game.direction_changed = true;
+    } else if keyboard_input.just_pressed(KeyCode::KeyS) && game.direction != Direction::Up {
         game.direction = Direction::Down;
+        game.direction_changed = true;
     }
-
-    game.direction_changed = true;
 }
 
 fn update_snake(
@@ -123,15 +125,15 @@ fn update_snake(
         let head_translation = transform.translation;
 
         let new_head_transform = match game.direction {
-            Direction::Up => Transform::from_xyz(head_translation.x, head_translation.y + 20., 0.0),
+            Direction::Up => Transform::from_xyz(head_translation.x, head_translation.y + 20., 1.),
             Direction::Down => {
-                Transform::from_xyz(head_translation.x, head_translation.y - 20., 0.0)
+                Transform::from_xyz(head_translation.x, head_translation.y - 20., 1.)
             }
             Direction::Left => {
-                Transform::from_xyz(head_translation.x - 20., head_translation.y, 0.0)
+                Transform::from_xyz(head_translation.x - 20., head_translation.y, 1.)
             }
             Direction::Right => {
-                Transform::from_xyz(head_translation.x + 20., head_translation.y, 0.0)
+                Transform::from_xyz(head_translation.x + 20., head_translation.y, 1.)
             }
         };
 
@@ -149,18 +151,20 @@ fn update_snake(
 
         let prize_transform = transforms.get_mut(game.prize.entity.unwrap()).unwrap();
 
-        if prize_transform.translation != new_head_transform.translation {
-            commands
-                .entity(game.parts.back().unwrap().entity.unwrap())
-                .despawn_recursive();
-
-            game.parts.pop_back().unwrap();
-        } else if game.prize.entity.is_some() {
+        if prize_transform.translation.x == new_head_transform.translation.x
+            && prize_transform.translation.y == new_head_transform.translation.y
+        {
             commands
                 .entity(game.prize.entity.unwrap())
                 .despawn_recursive();
 
             game.prize.entity = None;
+        } else if game.prize.entity.is_some() {
+            commands
+                .entity(game.parts.back().unwrap().entity.unwrap())
+                .despawn_recursive();
+
+            game.parts.pop_back().unwrap();
         }
 
         game.direction_changed = false;
