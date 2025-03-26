@@ -16,6 +16,7 @@ struct Game {
     prize: Prize,
     parts: VecDeque<Part>,
     direction: Direction,
+    direction_changed: bool,
 }
 
 #[derive(Default, PartialEq, Eq)]
@@ -52,6 +53,8 @@ fn setup(
 ) {
     commands.spawn(Camera2d);
 
+    game.direction_changed = false;
+
     game.parts.push_front(Part {
         entity: Some(
             commands
@@ -86,6 +89,11 @@ fn setup(
 }
 
 fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<Game>) {
+    let inputs = vec![KeyCode::KeyA, KeyCode::KeyD, KeyCode::KeyW, KeyCode::KeyS];
+    if game.direction_changed || !keyboard_input.any_pressed(inputs) {
+        return;
+    }
+
     if keyboard_input.pressed(KeyCode::KeyA) && game.direction != Direction::Right {
         game.direction = Direction::Left;
     } else if keyboard_input.pressed(KeyCode::KeyD) && game.direction != Direction::Left {
@@ -95,6 +103,8 @@ fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<G
     } else if keyboard_input.pressed(KeyCode::KeyS) && game.direction != Direction::Up {
         game.direction = Direction::Down;
     }
+
+    game.direction_changed = true;
 }
 
 fn update_snake(
@@ -152,6 +162,8 @@ fn update_snake(
 
             game.prize.entity = None;
         }
+
+        game.direction_changed = false;
     }
 }
 
