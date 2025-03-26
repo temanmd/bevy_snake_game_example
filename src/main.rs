@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::prelude::*;
 use std::collections::VecDeque;
 
 #[derive(Default)]
@@ -34,6 +35,7 @@ struct MoveTimer(Timer);
 struct HelloPlugin;
 
 const SNAKE_COLOR: Color = Color::srgb(0.2, 1.0, 0.4);
+const SNAKE_HEAD_COLOR: Color = Color::srgb(0.2, 0.4, 0.7);
 const PRIZE_COLOR: Color = Color::srgb(1.0, 0.2, 0.4);
 
 impl Plugin for HelloPlugin {
@@ -41,7 +43,10 @@ impl Plugin for HelloPlugin {
         app.insert_resource(MoveTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
         app.insert_resource(ClearColor(Color::srgb(0.1, 0.1, 0.1)));
         app.add_systems(Startup, setup);
-        app.add_systems(Update, (movement_system, update_snake, spawn_prize));
+        app.add_systems(
+            Update,
+            (movement_system, update_snake, spawn_prize, check_collide),
+        );
     }
 }
 
@@ -60,7 +65,7 @@ fn setup(
             commands
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
-                    MeshMaterial2d(materials.add(SNAKE_COLOR)),
+                    MeshMaterial2d(materials.add(SNAKE_HEAD_COLOR)),
                     Transform::from_xyz(0.0, 0.0, 1.).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
@@ -86,6 +91,12 @@ fn setup(
             ..default()
         },
     ));
+}
+
+fn check_collide(windows: Query<&mut Window>) {
+    // let window = windows.single();
+    // println!("{:?}", window.resolution.height());
+    // println!("{:?}", window.resolution.width());
 }
 
 fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<Game>) {
@@ -182,12 +193,34 @@ fn spawn_prize(
         return;
     }
     if timer.0.finished() {
+        let mut rng = rand::rng();
+
+        let window_width = 1280.0 / 2.0;
+        let window_height = 720.0 / 2.0;
+        let block_width = 20.0;
+        let horizontal_blocks_count = window_width / block_width;
+        let vertical_blocks_count = window_height / block_width;
+        let min = 0;
+        let x_rnd_max_position = horizontal_blocks_count - 1.0;
+        let y_rnd_max_position = vertical_blocks_count - 1.0;
+        let x_rnd_position = rng.random_range(min..=x_rnd_max_position as i32) as f32;
+        let y_rnd_position = rng.random_range(min..=y_rnd_max_position as i32) as f32;
+        let mut x_rnd = x_rnd_position * block_width;
+        let mut y_rnd = y_rnd_position * block_width;
+
+        if rng.random_bool(0.5) {
+            x_rnd = -x_rnd;
+        }
+        if rng.random_bool(0.5) {
+            y_rnd = -y_rnd;
+        }
+
         game.prize.entity = Some(
             commands
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
                     MeshMaterial2d(materials.add(PRIZE_COLOR)),
-                    Transform::from_xyz(-60.0, 100.0, 0.0).with_scale(Vec3::splat(20.)),
+                    Transform::from_xyz(x_rnd, y_rnd, 0.0).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
         );
