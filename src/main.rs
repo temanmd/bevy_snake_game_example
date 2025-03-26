@@ -35,7 +35,6 @@ struct MoveTimer(Timer);
 struct HelloPlugin;
 
 const SNAKE_COLOR: Color = Color::srgb(0.2, 1.0, 0.4);
-const SNAKE_HEAD_COLOR: Color = Color::srgb(0.2, 0.4, 0.7);
 const PRIZE_COLOR: Color = Color::srgb(1.0, 0.2, 0.4);
 
 impl Plugin for HelloPlugin {
@@ -65,8 +64,8 @@ fn setup(
             commands
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
-                    MeshMaterial2d(materials.add(SNAKE_HEAD_COLOR)),
-                    Transform::from_xyz(0.0, 0.0, 1.).with_scale(Vec3::splat(20.)),
+                    MeshMaterial2d(materials.add(SNAKE_COLOR)),
+                    Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
         ),
@@ -77,7 +76,7 @@ fn setup(
             .spawn((
                 Mesh2d(meshes.add(Rectangle::default())),
                 MeshMaterial2d(materials.add(PRIZE_COLOR)),
-                Transform::from_xyz(0.0, 200.0, 0.0).with_scale(Vec3::splat(20.)),
+                Transform::from_xyz(0.0, 200.0, 1.).with_scale(Vec3::splat(20.)),
             ))
             .id(),
     );
@@ -138,13 +137,13 @@ fn update_snake(
         let new_head_transform = match game.direction {
             Direction::Up => Transform::from_xyz(head_translation.x, head_translation.y + 20., 1.),
             Direction::Down => {
-                Transform::from_xyz(head_translation.x, head_translation.y - 20., 1.)
+                Transform::from_xyz(head_translation.x, head_translation.y - 20., 0.)
             }
             Direction::Left => {
-                Transform::from_xyz(head_translation.x - 20., head_translation.y, 1.)
+                Transform::from_xyz(head_translation.x - 20., head_translation.y, 0.)
             }
             Direction::Right => {
-                Transform::from_xyz(head_translation.x + 20., head_translation.y, 1.)
+                Transform::from_xyz(head_translation.x + 20., head_translation.y, 0.)
             }
         };
 
@@ -220,7 +219,7 @@ fn spawn_prize(
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
                     MeshMaterial2d(materials.add(PRIZE_COLOR)),
-                    Transform::from_xyz(x_rnd, y_rnd, 0.0).with_scale(Vec3::splat(20.)),
+                    Transform::from_xyz(x_rnd, y_rnd, 1.0).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
         );
