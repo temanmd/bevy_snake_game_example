@@ -42,10 +42,7 @@ impl Plugin for HelloPlugin {
         app.insert_resource(MoveTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
         app.insert_resource(ClearColor(Color::srgb(0.1, 0.1, 0.1)));
         app.add_systems(Startup, setup);
-        app.add_systems(
-            Update,
-            (movement_system, update_snake, spawn_prize, check_collide),
-        );
+        app.add_systems(Update, (movement_system, update_snake, spawn_prize));
     }
 }
 
@@ -90,12 +87,6 @@ fn setup(
             ..default()
         },
     ));
-}
-
-fn check_collide(windows: Query<&mut Window>) {
-    // let window = windows.single();
-    // println!("{:?}", window.resolution.height());
-    // println!("{:?}", window.resolution.width());
 }
 
 fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<Game>) {
