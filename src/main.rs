@@ -34,7 +34,8 @@ struct MoveTimer(Timer);
 
 struct HelloPlugin;
 
-const SNAKE_COLOR: Color = Color::srgb(0.2, 1.0, 0.4);
+const SNAKE_HEAD_COLOR: Color = Color::srgb(0.26, 0.68, 0.45);
+const SNAKE_COLOR: Color = Color::srgb(0.26, 0.46, 0.69);
 const PRIZE_COLOR: Color = Color::srgb(1.0, 0.2, 0.4);
 
 impl Plugin for HelloPlugin {
@@ -61,7 +62,7 @@ fn setup(
             commands
                 .spawn((
                     Mesh2d(meshes.add(Rectangle::default())),
-                    MeshMaterial2d(materials.add(SNAKE_COLOR)),
+                    MeshMaterial2d(materials.add(SNAKE_HEAD_COLOR)),
                     Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::splat(20.)),
                 ))
                 .id(),
@@ -118,6 +119,7 @@ fn update_snake(
     mut transforms: Query<&mut Transform>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    material_query: Query<&MeshMaterial2d<ColorMaterial>>,
 ) {
     if timer.0.tick(time.delta()).finished() {
         let transform = transforms
@@ -138,12 +140,18 @@ fn update_snake(
             }
         };
 
+        let old_head_entity = game.parts.front().unwrap().entity.unwrap();
+        let old_head_material_id = material_query.get(old_head_entity).unwrap();
+
+        let old_head_material = materials.get_mut(old_head_material_id).unwrap();
+        old_head_material.color = SNAKE_COLOR;
+
         game.parts.push_front(Part {
             entity: Some(
                 commands
                     .spawn((
                         Mesh2d(meshes.add(Rectangle::default())),
-                        MeshMaterial2d(materials.add(SNAKE_COLOR)),
+                        MeshMaterial2d(materials.add(SNAKE_HEAD_COLOR)),
                         new_head_transform.with_scale(Vec3::splat(20.)),
                     ))
                     .id(),
