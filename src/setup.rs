@@ -1,4 +1,4 @@
-use crate::config::*;
+use crate::config::{PRIZE_COLOR, SNAKE_HEAD_COLOR};
 use bevy::prelude::*;
 use std::collections::VecDeque;
 

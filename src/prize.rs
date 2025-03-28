@@ -1,4 +1,7 @@
-use crate::{config::*, setup::*};
+use crate::{
+    config::PRIZE_COLOR,
+    setup::{Game, MoveTimer},
+};
 use bevy::prelude::*;
 use rand::prelude::*;
 

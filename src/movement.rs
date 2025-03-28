@@ -1,4 +1,4 @@
-use crate::setup::*;
+use crate::setup::{Direction, Game};
 use bevy::prelude::*;
 
 pub struct MovementPlugin;

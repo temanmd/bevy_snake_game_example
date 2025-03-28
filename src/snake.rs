@@ -1,4 +1,7 @@
-use crate::{config::*, setup::*};
+use crate::{
+    config::{SNAKE_COLOR, SNAKE_HEAD_COLOR},
+    setup::{Direction, Game, MoveTimer, Part},
+};
 use bevy::prelude::*;
 
 pub struct SnakePlugin;
