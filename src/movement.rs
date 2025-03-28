@@ -27,22 +27,17 @@ fn movement_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut game: ResMut<G
     } else if keyboard_input.just_pressed(KeyCode::KeyS) {
         game.direction = Direction::Down;
     }
+
     game.direction_changed = true;
 }
 
 fn is_valid_move(direction: &Direction, input: &ButtonInput<KeyCode>) -> bool {
     match direction {
         Direction::Left | Direction::Right => {
-            if input.just_pressed(KeyCode::KeyW) || input.just_pressed(KeyCode::KeyS) {
-                return true;
-            }
+            input.just_pressed(KeyCode::KeyW) || input.just_pressed(KeyCode::KeyS)
         }
         Direction::Up | Direction::Down => {
-            if input.just_pressed(KeyCode::KeyA) || input.just_pressed(KeyCode::KeyD) {
-                return true;
-            }
+            input.just_pressed(KeyCode::KeyA) || input.just_pressed(KeyCode::KeyD)
         }
     }
-
-    false
 }
